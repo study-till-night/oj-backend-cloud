@@ -1,0 +1,56 @@
+spring:
+  session:
+    store-type: redis
+  #  微服务配置
+  cloud:
+    #    服务注册配置
+    consul:
+      host: localhost
+      port: 8500
+      discovery:
+        service-name: ${spring.application.name}
+        #        开启心跳检测 否则consul将无法通过检测
+        heartbeat:
+          enabled: true
+        prefer-ip-address: true
+      #      consul分布式配置 可通过在consul上修改变量作用到本地程序 从而节省修改成本
+      config:
+        profile-separator: "-"
+        format: yaml
+        #        实际开发慎改 consul云端修改生效时间 默认55s
+        watch:
+          wait-time: 1
+    gateway:
+      routes:
+        - id: oj-backend-user-service
+          uri: lb://userService
+          predicates:
+            - Path=/api/user/**
+        - id: oj-backend-question-service
+          uri: lb://questionService
+          predicates:
+            - Path=/api/question/**
+        - id: oj-backend-judge-service
+          uri: lb://judgeService
+          predicates:
+            - Path=/api/judge/**
+  application:
+    name: gateway
+  main:
+    web-application-type: reactive
+#  config:
+#    import: optional:consul
+server:
+  port: 9001
+
+knife4j:
+  gateway:
+    # ① 第一个配置，开启gateway聚合组件
+    enabled: true
+    # ② 第二行配置，设置聚合模式采用discover服务发现的模式
+    strategy: discover
+    discover:
+      # ③ 第三行配置，开启discover模式
+      enabled: true
+      # ④ 第四行配置，聚合子服务全部为Swagger2规范的文档
+      version: swagger2

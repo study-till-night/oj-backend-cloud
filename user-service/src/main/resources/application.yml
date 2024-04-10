@@ -1,0 +1,67 @@
+spring:
+  # 数据库配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/oj_system?allowMultiQueries=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&&rewriteBatchedStatements=true
+    username: root
+    password: 654160
+  session:
+    store-type: redis
+  # Redis 配置
+  redis:
+    #       redis单机配置
+    #      从0-15号数据库中进行选择
+    database: 0
+    #    host: 192.168.234.128
+    port: 6379
+    password: 654160
+    #      redis连接池
+    lettuce:
+      pool:
+        enabled: true
+        max-active: 4
+        max-wait: -1
+    host: 112.124.32.84
+
+  #  微服务配置
+  cloud:
+    #    服务注册配置
+    consul:
+      host: localhost
+      port: 8500
+      discovery:
+        service-name: ${spring.application.name}
+        #        开启心跳检测 否则consul将无法通过检测
+        heartbeat:
+          enabled: true
+        prefer-ip-address: true
+      #      consul分布式配置 可通过在consul上修改变量作用到本地程序 从而节省修改成本
+      config:
+        profile-separator: "-"
+        format: yaml
+        #        实际开发慎改 consul云端修改生效时间 默认55s
+        watch:
+          wait-time: 1
+  application:
+    name: userService
+#  config:
+#    import: optional:consul
+server:
+  port: 9004
+  servlet:
+    context-path: /api/user
+    session:
+      cookie:
+        #        !!! 保证所有子模块下Cookie路径一致  不然无法实现单点登录
+        path: /api
+
+mybatis-plus:
+  global-config:
+    db-config:
+      logic-delete-field: isDelete
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+  mapper-locations: classpath*:mapper/*Mapper.xml
+
+knife4j:
+  enable: true

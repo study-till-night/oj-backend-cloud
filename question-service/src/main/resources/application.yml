@@ -1,0 +1,88 @@
+spring:
+  rabbitmq:
+    #    host: 192.168.234.128
+    port: 5672
+    username: guest
+    password: 654160
+    virtual-host: /
+    #    none -- 值是禁用发布确认模式，是默认值
+    #    correlated -- 值是发布消息成功到交换器后会触发回调方法
+    #    simple --  值经测试有两种效果，其一效果和 CORRELATED 值一样会触发回调方法，
+    #    其二在发布消息成功后使用 rabbitTemplate 调用 waitForConfirms 或 waitForConfirmsOrDie 方法等待 broker 节点返回发送结果，
+    #    根据返回结果来判定下一步的逻辑，要注意的点是 waitForConfirmsOrDie 方法如果返回 false 则会关闭 channel，则接下来无法发送消息到 broker;
+    publisher-confirm-type: correlated
+    #    是否允许消息回退
+    publisher-returns: true
+    host: 112.124.32.84
+    listener:
+      simple:
+        retry:
+          initial-interval: 60000
+
+  # 数据库配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/oj_system?allowMultiQueries=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&&rewriteBatchedStatements=true
+    username: root
+    password: 654160
+  session:
+    store-type: redis
+  # Redis 配置
+  redis:
+    #       redis单机配置
+    #      从0-15号数据库中进行选择
+    database: 0
+    #    host: 192.168.234.128
+    port: 6379
+    password: 654160
+    #      redis连接池
+    lettuce:
+      pool:
+        enabled: true
+        max-active: 4
+        max-wait: -1
+    host: 112.124.32.84
+
+  #  微服务配置
+  cloud:
+    #    服务注册配置
+    consul:
+      host: localhost
+      port: 8500
+      discovery:
+        service-name: ${spring.application.name}
+        #        开启心跳检测 否则consul将无法通过检测
+        heartbeat:
+          enabled: true
+        prefer-ip-address: true
+      #      consul分布式配置 可通过在consul上修改变量作用到本地程序 从而节省修改成本
+      config:
+        profile-separator: "-"
+        format: yaml
+        #        实际开发慎改 consul云端修改生效时间 默认55s
+        watch:
+          wait-time: 1
+  application:
+    name: questionService
+#  config:
+#    import: optional:consul
+server:
+  port: 9002
+  servlet:
+    context-path: /api/question
+    session:
+      cookie:
+        #        !!! 保证所有子模块下Cookie路径一致  不然无法实现单点登录
+        path: /api
+
+mybatis-plus:
+  global-config:
+    db-config:
+      logic-delete-field: isDelete
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+  mapper-locations: classpath*:mapper/*Mapper.xml
+
+knife4j:
+  enable: true
+
